@@ -1,18 +1,18 @@
 {
   "name": "custom-properties-color-shades",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "scripts": {
     "build": "npm run build:main && npm run build:module",
     "build:main": "babel src --out-dir lib/main --config-file ./babelrc.main.json",
     "build:module": "babel src --out-dir lib/module --config-file ./babelrc.module.json --out-file-extension .mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "JuanDAC",
   "license": "MIT",
-  "module": "./lib/module/index.mjs",
+  "module": "lib/module/index.mjs",
   "types": "index.d.ts",
-  "main": "./lib/main/index.js",
+  "main": "lib/main/index.js",
   "exports": {
     ".": {
       "import": "./lib/module/index.mjs",
@@ -31,6 +31,7 @@
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.16.4",
-    "babel-plugin-replace-import-extension": "^1.1.2"
+    "babel-plugin-replace-import-extension": "^1.1.2",
+    "jest": "^27.3.1"
   }
 }
