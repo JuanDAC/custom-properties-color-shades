@@ -38,7 +38,7 @@ export const customPropertiesShades = (selectors, colors) =>
                 .map(generateRule(name))
                 .reduce(combineRules,)
             } ${name}: ${value};`
-        ).join()} }`;
+        ).join('')} }`;
 
 export default customPropertiesShades;
 
