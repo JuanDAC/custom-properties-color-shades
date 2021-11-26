@@ -30,7 +30,7 @@ export const diferent = (value) => (hexadecimal) => hexadecimal !== value;
 export const customPropertiesShades = (selectors, colors) =>
     `${selectors.join(',')} { ${[...colors.entries()]
         .map(([name, value]) =>
-            `${createShades.default(value)
+            `${createShades(value)
                 .colors
                 .sort(luminanceSorter)
                 .map(extractorHex)
