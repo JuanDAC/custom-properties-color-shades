@@ -1,18 +1,20 @@
 {
-  "name": "custom-properties-color-shades",
-  "version": "1.0.5",
+  "name": "reduce-middleware",
+  "version": "1.0.9",
   "description": "",
   "scripts": {
-    "build": "npm run build:main && npm run build:module",
+    "build": "npm run build:main && npm run build:module && npm run build:browser",
     "build:main": "babel src --out-dir lib/main --config-file ./babelrc.main.json",
     "build:module": "babel src --out-dir lib/module --config-file ./babelrc.module.json --out-file-extension .mjs",
+    "build:browser": "babel src --out-dir lib/module --config-file ./babelrc.module.json --out-file-extension .js",
     "test": "jest"
   },
   "author": "JuanDAC",
   "license": "MIT",
   "module": "lib/module/index.mjs",
+  "main": "lib/module/index.js",
   "types": "index.d.ts",
-  "main": "lib/main/index.js",
+  "browser": "lib/main/index.js",
   "exports": {
     ".": {
       "import": "./lib/module/index.mjs",
@@ -24,9 +26,7 @@
     "*.d.ts",
     "./lib/*/index.*"
   ],
-  "dependencies": {
-    "colorshades": "^1.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",

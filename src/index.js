@@ -1,45 +1,44 @@
-import createShades from "colorshades";
+const reducerMiddlewares = (methodName) => (reducer, middleware) => middleware(methodName, reducer);
 
-/**
- * luminanceSorter:: ({ luminance: number }, { luminance: number }) -> number
- */
-export const luminanceSorter = (
-    { luminance: luminanceA },
-    { luminance: luminanceB }
-) => luminanceA - luminanceB;
-/**
- * extractorHex:: ({ hex: string }) -> string
- */
-export const extractorHex = ({ hex: hexadecimal }) => hexadecimal;
-/**
- * generateRule:: (string) -> (string, number) -> string
- */
-export const generateRule = (name) => (hexadecimal, index) => `${name}-${index + 1}: ${hexadecimal};`;
-/**
- * combineRules:: (string, string) => string
- */
-export const combineRules = (rules, rule) => `${rules} ${rule}`;
-/**
- * diferent:: string => string => boolean  
- */
-export const diferent = (value) => (hexadecimal) => hexadecimal !== value;
+const applyMiddlewares = (middlewares) => ([methodName, reducer]) => [methodName, middlewares.reduce(reducerMiddlewares(methodName), reducer)];
 
-/**
- * customPropertiesShades:: (string, Map<string, number>) => string
- */
-export const customPropertiesShades = (selectors, colors) =>
-    `${selectors.join(',')} { ${[...colors.entries()]
-        .map(([name, value]) =>
-            `${createShades(value)
-                .colors
-                .sort(luminanceSorter)
-                .map(extractorHex)
-                .filter(diferent(value))
-                .map(generateRule(name))
-                .reduce(combineRules,)
-            } ${name}: ${value};`
-        ).join('')} }`;
+const areMiddleware = (acum, middleware) => acum && typeof middleware == 'function'
 
-export default customPropertiesShades;
+const addMiddleware = (reducers = {}, middlewares = []) => {
+    if (!(Array.isArray(middlewares) && middlewares.reduce(areMiddleware, middlewares.length > 0)))
+        throw Error('you should use an array of middlewawres');
+    const entriesReducers = Object.entries(reducers);
+    const reducersWithMiddleware = entriesReducers.map(applyMiddlewares(middlewares));
+    const newReducers = Object.fromEntries(reducersWithMiddleware);
+    return newReducers;
+};
 
-// console.log(customPropertiesShades([':root', 'power-styles'], COLORS));
+export const sliceMiddleware = (sliceConfig = {}, middlewares) => {
+    const { reducers, initialState } = sliceConfig;
+    const middlewareWithConfig = middlewares.map((middleware) => middleware(sliceConfig));
+    const middlewaresToApply = middlewareWithConfig.map((middleware) => middleware.middleware);
+    const initialStateToApply = middlewareWithConfig.map((middleware) => middleware.initialStateUpdate);
+    sliceConfig.reducers = addMiddleware(reducers, middlewaresToApply);
+    sliceConfig.initialState = initialStateToApply.reduce((state, func) => func(state), initialState);
+    return sliceConfig;
+}
+
+export const middlewareLocalStorage = ({ name, initialState: { appName } }) => {
+    if (typeof appName === 'undefined')
+        throw Error('You should add appName key in the initialState');
+
+    const keyLocalStorage = `${appName}/${name}`;
+
+    const initialStateUpdate = (initialState) => {
+        const newInitialState = JSON.parse(localStorage.getItem(keyLocalStorage)) || initialState;
+        return newInitialState;
+    }
+
+    const middleware = (_, reducer) => (...args) => {
+        reducer(...args);
+        const [state] = args;
+        localStorage.setItem(`${appName}/${name}`, JSON.stringify(state));
+    };
+
+    return { middleware, initialStateUpdate };
+}
